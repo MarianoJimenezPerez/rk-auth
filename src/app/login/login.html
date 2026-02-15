@@ -1,0 +1,92 @@
+<div class="min-h-screen flex flex-col md:flex-row font-['Inter']">
+  <!-- Columna Izquierda (Diseño/Logo) -->
+  <div
+    class="w-full md:w-1/2 bg-[#121826] flex flex-col items-center justify-center p-8 text-white"
+  >
+    <div class="max-w-md w-full flex flex-col items-center">
+      <img src="logos/rkpanel_soporte_linea.svg" alt="RK Soporte" class="w-64 mb-8" />
+
+      <h1
+        class="text-4xl font-bold mb-8 bg-linear-to-r from-[#FF41F8] via-[#CC26D5] to-[#7702FF] bg-clip-text text-transparent"
+      >
+        Gestión de Incidencias
+      </h1>
+
+      <div class="space-y-6 w-full max-w-sm">
+        @for (feature of features(); track feature.text) {
+          <div class="flex items-center gap-4">
+            <div class="bg-white/10 p-2 rounded-lg">
+              <mat-icon class="text-gray-400">{{ feature.icon }}</mat-icon>
+            </div>
+            <p class="text-gray-300">{{ feature.text }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna Derecha (Formulario) -->
+  <div class="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
+    <div class="max-w-sm w-full">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">¡Hola!</h2>
+        <p class="text-gray-500">Inicia sesión en tu cuenta para continuar</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Usuario -->
+        <div>
+          <div class="relative">
+            <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >person_outline</mat-icon
+            >
+            <input
+              type="text"
+              formControlName="usuario"
+              placeholder="Usuario"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6BA800] focus:border-transparent outline-none transition-all"
+              [class.border-red-500]="
+                loginForm.get('usuario')?.touched && loginForm.get('usuario')?.invalid
+              "
+            />
+          </div>
+          @if (loginForm.get('usuario')?.touched && loginForm.get('usuario')?.invalid) {
+            <p class="text-red-500 text-xs mt-1">El usuario es requerido</p>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div>
+          <div class="relative">
+            <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >lock_outline</mat-icon
+            >
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Contraseña"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6BA800] focus:border-transparent outline-none transition-all"
+              [class.border-red-500]="
+                loginForm.get('password')?.touched && loginForm.get('password')?.invalid
+              "
+            />
+          </div>
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <p class="text-red-500 text-xs mt-1">
+              @if (loginForm.get('password')?.errors?.['required']) {
+                La contraseña es requerida
+              }
+            </p>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-[#6BA800] hover:bg-[#5a8d00] text-white font-semibold py-3 rounded-lg transition-colors shadow-lg active:scale-[0.98]"
+        >
+          Iniciar sesión
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
