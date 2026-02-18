@@ -42,15 +42,15 @@
             >
             <input
               type="text"
-              formControlName="usuario"
+              formControlName="username"
               placeholder="Usuario"
               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6BA800] focus:border-transparent outline-none transition-all"
               [class.border-red-500]="
-                loginForm.get('usuario')?.touched && loginForm.get('usuario')?.invalid
+                loginForm.get('username')?.touched && loginForm.get('username')?.invalid
               "
             />
           </div>
-          @if (loginForm.get('usuario')?.touched && loginForm.get('usuario')?.invalid) {
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.invalid) {
             <p class="text-red-500 text-xs mt-1">El usuario es requerido</p>
           }
         </div>
@@ -80,11 +80,16 @@
           }
         </div>
 
+        @if (errorMessage()) {
+          <p class="text-red-500 text-sm text-center">{{ errorMessage() }}</p>
+        }
+
         <button
           type="submit"
-          class="w-full bg-[#6BA800] hover:bg-[#5a8d00] text-white font-semibold py-3 rounded-lg transition-colors shadow-lg active:scale-[0.98]"
+          [disabled]="loading()"
+          class="w-full bg-[#6BA800] hover:bg-[#5a8d00] disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg active:scale-[0.98]"
         >
-          Iniciar sesión
+          {{ loading() ? 'Iniciando sesión...' : 'Iniciar sesión' }}
         </button>
       </form>
     </div>
