@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AmonService } from '../../services/amon/amon.service';
+import { AmonService } from '../../../services/amon/amon.service';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,29 @@ import { AmonService } from '../../services/amon/amon.service';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private amonService = inject(AmonService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   loginForm: FormGroup;
+
+  /** URL a la que redirigir tras login exitoso (query param returnUrl). Acepta valor URL-encoded. */
+  private get returnUrl(): string | null {
+    const raw = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!raw) return null;
+    let url: string;
+    try {
+      url = decodeURIComponent(raw);
+    } catch {
+      return null;
+    }
+    if (url.startsWith('/')) return null;
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname.endsWith('rkpanel.com')) return url;
+    } catch {
+      /* invalid URL */
+    }
+    return null;
+  }
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -42,7 +65,12 @@ export class LoginComponent {
     this.amonService.login(body).subscribe({
       next: () => {
         this.loading.set(false);
-        // TODO: redirigir
+        const url = this.returnUrl;
+        if (url) {
+          window.location.href = url;
+        } else {
+          this.router.navigateByUrl('/welcome');
+        }
       },
       error: (err) => {
         this.loading.set(false);
