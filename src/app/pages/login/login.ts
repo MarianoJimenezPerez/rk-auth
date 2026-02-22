@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AmonService } from '../../../services/amon/amon.service';
+import { AuthStateService } from '../../../services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { AmonService } from '../../../services/amon/amon.service';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private amonService = inject(AmonService);
+  private authState = inject(AuthStateService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   loginForm: FormGroup;
@@ -63,8 +65,9 @@ export class LoginComponent {
     const body = this.loginForm.getRawValue();
 
     this.amonService.login(body).subscribe({
-      next: () => {
+      next: (response) => {
         this.loading.set(false);
+        this.authState.handleLoginSuccess(response);
         const url = this.returnUrl;
         if (url) {
           window.location.href = url;

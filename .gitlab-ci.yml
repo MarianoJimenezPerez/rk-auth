@@ -1,0 +1,48 @@
+image: 'node:22.17.1'
+
+before_script:
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  # Paste the PRIVATE key into a gitlab variable. Pay attention to the linebreak at the end when pasting
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - echo "$SSH_PRUBLIC_KEY" | tr -d '\r' > ~/.ssh/id_rsa.pub
+  - chmod 644 ~/.ssh/id_rsa.pub
+  - ls -la ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  - echo -e "Host *\n\tRequestTTY force\n\n" > ~/.ssh/config
+  - chmod 600 ~/.ssh/config
+  - eval "$(ssh-agent -s)"
+  - ssh-add -k ~/.ssh/id_rsa
+  - ssh-keyscan -H 188.166.5.28 >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+#### Client (Angular)
+deploy_stage_client:
+  stage: deploy
+  environment: staging
+  only:
+    - dev
+  when: manual
+  script:
+    - apt-get update && apt-get install -y zip
+    - rm -rf node_modules
+    - yarn cache clean
+    - yarn install --frozen-lockfile
+    - yarn global add @angular/cli
+
+    # Build Angular (staging = environment.dev.ts con cookiePrefix 'dev')
+    - yarn build --configuration=staging
+
+    # Empaquetar dist en zip
+    - 'test -d dist || (echo "ERROR: dist folder not found" && exit 1)'
+    - cd dist
+    - zip -r atum.zip *
+    - cd ..
+
+    # Subir zip a temp en el VPS
+    - ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no deployer@188.166.5.28 "mkdir -p /var/www/atum/temp"
+    - scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dist/atum.zip deployer@188.166.5.28:/var/www/atum/temp/
+
+    # Descomprimir y publicar
+    - ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no deployer@188.166.5.28 "set -e; cd /var/www/atum/temp; rm -rf atum dist; unzip -o atum.zip -d atum; mv atum dist; rm -f atum.zip; rm -rf /var/www/atum/dist; mv dist /var/www/atum/; rm -rf /var/www/atum/temp/dist"

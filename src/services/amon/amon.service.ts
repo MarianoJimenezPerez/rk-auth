@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import type { LoginDTO, AuthResponse } from './amon.types';
+import type { LoginDTO, AuthResponse, User } from './amon.types';
 
 const RKPANEL_COOKIE_DOMAIN = '.rkpanel.com';
 
@@ -31,6 +31,13 @@ export class AmonService {
    */
   login(body: LoginDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/login`, body);
+  }
+
+  /**
+   * GET /api/users/profile
+   */
+  getProfile(): Observable<User> {
+    return this.http.get<User>(`${this.baseUrl}/api/users/profile`);
   }
 
   /**

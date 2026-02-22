@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   amonBaseUrl: 'https://amondev.rkpanel.com',
   cookiePrefix: 'dev',
 };
